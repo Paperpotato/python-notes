@@ -1,0 +1,112 @@
+{
+  "name": "02- Diagnosis ICD Codes Short List",
+  "content": {
+    "sections": [
+      {
+        "name": "Diagnosis",
+        "questions": [
+          {
+            "name": "Common Diagnosis for Chiropractors",
+            "type": "checkboxes",
+            "answers": [
+              {
+                "value": "***********************HEADACHE & NECK**********************"
+              },
+              { "value": "R51\t\tHeadache" },
+              {
+                "value": "G44.201\tTension-type headache, unspecified, intractable"
+              },
+              {
+                "value": "G44.209\tTension-type headache, unspecified, not intractable"
+              },
+              { "value": "M54.2\t\tCervicalgia" },
+              {
+                "value": "S13.4XXA\tSprain of ligaments of cervical spine, initial encounter"
+              },
+              {
+                "value": "M50.32\tOther cervical disc degeneration, mid-cervical region"
+              },
+              {
+                "value": "M47.812\tSpondylosis without myelopathy or radiculopathy, cervical region"
+              },
+              { "value": "M43.6\t\tTorticollis (Wry Neck)" },
+              {
+                "value": "M50.12\tCervical disc disorder with radiculopathy, mid-cervical region"
+              },
+              {
+                "value": "************************THORACIC******************************"
+              },
+              { "value": "M54.6\t\tPain in thoracic spine" },
+              {
+                "value": "M99.08\tSegmental and somatic dysfunction of rib cage"
+              },
+              { "value": "S23.41XA\tSprain of ribs, initial encounter" },
+              {
+                "value": "**************************LUMBAR****************************"
+              },
+              { "value": "M54.5\t\tLow back pain" },
+              {
+                "value": "M99.04\tSegmental and somatic dysfunction of sacral region"
+              },
+              {
+                "value": "S33.6XXA\tSprain of sacroiliac joint, initial encounter"
+              },
+              {
+                "value": "M51.36\tOther intervertebral disc degeneration, lumbar region"
+              },
+              {
+                "value": "M51.37\tOther intervertebral disc degeneration, lumbosacral region"
+              },
+              {
+                "value": "M47.816\tSpondylosis without myelopathy or radiculopathy, lumbar region"
+              },
+              { "value": "M54.31\tSciatica, right side" },
+              { "value": "M54.32\tSciatica, left side" },
+              { "value": "M54.41\tLumbago with sciatica, right side" },
+              { "value": "M54.42\tLumbago with sciatica, left side" },
+              {
+                "value": "***********************POSTURE**********************"
+              },
+              { "value": "R29.3 Abnormal posture - Abnormal head position" },
+              {
+                "value": "M43.8X2 Other specified deforming dorsopathies, cervical region - Loss cervical lordosis"
+              },
+              {
+                "value": "M40.294 Other kyphosis, thoracic region - Loss thoracic kyphosis"
+              },
+              {
+                "value": "M40.204 Unspecified kyphosis, thoracic region - Increase thoracic kyphosis"
+              },
+              { "value": "M40.205 Unspecified kyphosis, thoracolumbar region" },
+              { "value": "M40.209 Unspecified kyphosis, site unspecified" },
+              {
+                "value": "M43.8X6 Other specified deforming dorsopathies, lumbar region - Loss lumbar lordosis"
+              },
+              {
+                "value": "M21.70 Unequal limb length (acquired), unspecified site"
+              }
+            ]
+          },
+          { "name": "Other ICD Codes", "type": "paragraph" },
+          {
+            "name": "Segemental Joint Dysfunction",
+            "type": "paragraph",
+            "answer": "<div>M99.01-05 Segmental and somatic dysfunction of cervical, thoracic, lumbar &amp; pelvic regions</div>"
+          }
+        ]
+      },
+      {
+        "name": "Symptom Location",
+        "questions": [{ "name": "Body Chart", "type": "bodycharts" }]
+      }
+    ]
+  },
+  "print_settings": {
+    "include_patient_address": null,
+    "include_patient_dob": null,
+    "include_patient_medicare": null,
+    "include_patient_occupation": null,
+    "include_patient_reference_number": null,
+    "title": null
+  }
+}
