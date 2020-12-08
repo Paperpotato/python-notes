@@ -14,6 +14,7 @@ SCOPES = ['https://www.googleapis.com/auth/calendar', 'https://www.googleapis.co
 
 missing_notes = []
 today = datetime.date.today().strftime("%d-%m-%Y")
+full_date = datetime.date.today().strftime('%d %b %y')
 print(today)
 
 noteTemplates = {
@@ -29,52 +30,56 @@ noteTemplates = {
     'm': 'Manual adjustments: side-posture L/SI, supine C/S & T/S\nLess pain and increased ROM immediately following treatment',
     'l': 'Low force adjustments: prone activator full spine\nLess pain and increased ROM immediately following treatment',
     'lc': 'Activator C2/C5',
-    #muscles
-    'lm': 'bilateral quadratus lumborum and multifidus',
+    #muscles'
+    'bm': 'bilateral quadratus lumborum and multifidus',
+    'lm': 'bilateral piriformis, hamstrings',
     'um': 'bilateral suboccipital',
     'sh': 'bilateral shoulders',
     'kn': 'pes anserine. manual traction of bilateral knees',
     #modalities
     # 'art': 'ART of above muscles', #ART already included in spinal regions & STT
     'dn': 'Dry needling of above muscles',
-    'e': 'New exercises:',
+    'a': 'ART of above muscles',
+    'ex': 'New exercises:',
     'sup': 'Supplements recommended:',
-    's': ['d', 'im', 'c', 't', 'ls', 'm', 'lm', 'dn']
+    's': ['im', 'c', 't', 'ls', 'm', 'lm', 'dn']
 }
 
 def command_prompt(patient_name):
-    return f'Commands for {patient_name} (s --history: im/nim/e --std treatments: /im/c/t/ls/m --muscles: lm/um/sh/kn --misc: dn/e/sup):'
+    return f'#################################################################\n\nPATIENT: {patient_name} - {full_date}\nCOMMANDS:\n--std:\nim,c,t,ls,m,lm,dn \n--history: \nim/nim/e \n--std treatments: \nc/t/ls/(m)an/(l)ow \n--muscles: \nbm/lm/um/sh/kn \n--misc: \ndn/a/e/sup):\n'
 
 def parse_commands(commands, prev_notes):
     full_notes = ''
-    # commands = re.sub("[]", '', commands)
     try:
-        commands = re.search('\[(.+?)\]', str(commands)).group(1)
+        commands = re.search('\[(.+?)\]', str(commands)).group(1) if type(commands) is str else commands
     except AttributeError:
-        # AAA, ZZZ not found in the original string
         print('no regex match')
-        pass # apply your error handling
-    
-    if 'e' in commands:
-            history_input = input('General history/progress input: ') + '\n\n'
+        pass
+    print(commands)
+    if 'e' in commands and 's' not in commands:
+        history_input = input('General history/progress input: ') + '\n\n'
+        for command in noteTemplates['s']:
+            full_notes = full_notes + noteTemplates[command] + '\n'
+    elif 'e' in commands:
+        history_input = input('General history/progress input: ') + '\n\n'
     else:
         history_input = ''
     # if 's' and 'e' in commands:
     #     full_notes = f'{prev_notes}\n\n{input("Additional notes: ")}'
     #     for command in noteTemplates['s']:
     #         full_notes = full_notes + noteTemplates[command] + '\n'
-    if 's' in commands:
+    if 's' in commands and len(commands) == 1:
         for command in noteTemplates['s']:
             full_notes = full_notes + noteTemplates[command] + '\n'
-    ####### TODO: add sup catch
+    ####### TODO: add sup catch AND EXERCISES
     elif 's' not in commands:
         for command in commands:
             command = command.strip()
             print(command)
             # command = re.sub("\'", '', command) if "\'" in command else command
-            full_notes = full_notes + noteTemplates[command] + '\n'
+            full_notes = full_notes + noteTemplates[command.strip().replace('\'', '')] + '\n'
     print('#################################################################')
-    return f'<{today}>\n{history_input}{full_notes}\n\n[{str(commands) if len(commands) != 1 else f"[str(command)]"}]'
+    return f'<{today}>\n{history_input}{full_notes}\n{str(commands) if len(commands) != 1 else f"{str(commands)}"}'
 
 def main():
     """Shows basic usage of the Google Calendar API.
@@ -112,60 +117,45 @@ def main():
     if not events:
         print('No upcoming events found.')
     for event in events:
-        start = event['start'].get('dateTime', event['start'].get('date'))
-        # if event['summary'] == 'Kevin Giang':
-        
-        try:
-            previous_date = re.search('<(.+?)>', event['description'])
+        start_date = event['start'].get('dateTime', event['start'].get('date'))
+        start_time = event['start'].get('dateTime', event['start'].get('time'))
+        print(f'entry for: {event["summary"]}')
+        if start_time == None:
+            print(f'Skipping: {event["summary"]}')
+        else:
             try:
-                if previous_date.group(1) == today:
-                    continue
-            except AttributeError:
-                print('attribute error. continuing...')
-            final_note = ''
-            # user_input = input('Enter commands (c to copy previous note): ')
-            # missing_notes.append(event)
-            # print(event['description'])
-            old_note = event['description']
-            try:
-                found = re.search('\[(.+?)\]', old_note).group(1)
-            except AttributeError:
-                # AAA, ZZZ not found in the original string
-                found = '' # apply your error handling
-            pyperclip.copy(found)
-            # print(old_note)
-            # if 'e' in event['description']:
-            user_input = input(f'{old_note} -{event["summary"]}- (p to paste): ').split(',') if found else input(command_prompt(event['summary'])).split(',')
-            if user_input == 'p':
-                #call function - parse_notes()
-                final_note = pyperclip.paste()
-            else:
+                previous_date = re.search('<(.+?)>', event['description'])
+                try:
+                    if previous_date.group(1) == today:
+                        continue
+                except AttributeError:
+                    print('attribute error. continuing...')
+                # final_note = ''
+                old_note = event['description']
+                try:
+                    found = re.search('\[(.+?)\]', old_note).group(1)
+                except AttributeError:
+                    found = '' 
+                pyperclip.copy(found)
+                # print(old_note)
+                # if 'e' in event['description']:
+                user_input = input(f'{old_note} -{event["summary"]}- (p to paste): ').split(',') if found else input(command_prompt(event['summary'])).split(',')
+                if user_input == 'p':
+                    #call function - parse_notes()
+                    final_note = pyperclip.paste()
+                else:
+                    event['description'] = parse_commands(user_input, '')
+                
+                # print(event, final_note)
+                service.events().update(calendarId='primary', eventId=event['id'], body=event).execute()
+                print('#################################################################')
+            except KeyError:
+                user_input = input(command_prompt(event['summary'])).split(',')
+                #call parse notes and update event description
                 event['description'] = parse_commands(user_input, '')
-            
-            print(event, final_note)
-            service.events().update(calendarId='primary', eventId=event['id'], body=event).execute()
-            print('#################################################################')
-        except KeyError:
-            user_input = input(command_prompt(event['summary'])).split(',')
-            #call parse notes and update event description
-            event['description'] = parse_commands(user_input, '')
-            print(event, parse_commands(user_input, ''))
-            service.events().update(calendarId='primary', eventId=event['id'], body=event).execute()
-            print('#################################################################')
-            # missing_notes.append(event)
-
-
-    final_note = ''
-    for event in missing_notes:
-        # print(event['description'])
-        print('from missing notes with missing description')
-        user_input = input(command_prompt(event['summary'])).split(',')
-        #call parse notes and update event description
-        event['description'] = parse_commands(user_input, '')
-        print(event, parse_commands(user_input, ''))
-        service.events().update(calendarId='primary', eventId=event['id'], body=event).execute()
-        print('#################################################################')
-
+                # print(event, parse_commands(user_input, ''))
+                service.events().update(calendarId='primary', eventId=event['id'], body=event).execute()
+                print('#################################################################')
 
     
 
