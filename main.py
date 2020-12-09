@@ -8,78 +8,71 @@ import re
 from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
+import command_dict as cd
 
 # If modifying these scopes, delete the file token.pickle.
 SCOPES = ['https://www.googleapis.com/auth/calendar', 'https://www.googleapis.com/auth/calendar.events']
 
-missing_notes = []
 today = datetime.date.today().strftime("%d-%m-%Y")
 full_date = datetime.date.today().strftime('%d %b %y')
-print(today)
+print('Writing notes for:', today)
 
-noteTemplates = {
-    'd': today,
-    #history
-    'im': 'Cervical Spine: improved\nThoracic Spine: improved\nLumbar Spine: improved\nSacroIliac Joints: improved\nNo post-treatment soreness\n',
-    'nim': 'No improvement',
-    'e': 'Progress update:',
-    #spinal regions and STT
-    'c': 'C/Tx: C2/C5 supine manual, STT and ART to upper traps and levator scapularis, manual traction to cervical spine',
-    't': 'T/Tx: T7/T10',
-    'ls': 'LSI/Tx: L3/L4, L5/S1, RPI/LAS manual side posture, STT to bilateral multifidus and QLs, ART to piriformis and gluteals, PNF to hamstrings, myofascial release to low back fascia',
-    'm': 'Manual adjustments: side-posture L/SI, supine C/S & T/S\nLess pain and increased ROM immediately following treatment',
-    'l': 'Low force adjustments: prone activator full spine\nLess pain and increased ROM immediately following treatment',
-    'lc': 'Activator C2/C5',
-    #muscles'
-    'bm': 'bilateral quadratus lumborum and multifidus',
-    'lm': 'bilateral piriformis, hamstrings',
-    'um': 'bilateral suboccipital',
-    'sh': 'bilateral shoulders',
-    'kn': 'pes anserine. manual traction of bilateral knees',
-    #modalities
-    # 'art': 'ART of above muscles', #ART already included in spinal regions & STT
-    'dn': 'Dry needling of above muscles',
-    'a': 'ART of above muscles',
-    'ex': 'New exercises:',
-    'sup': 'Supplements recommended:',
-    's': ['im', 'c', 't', 'ls', 'm', 'lm', 'dn']
-}
+command_dict = cd.command_dict
+
+def init_consult():
+    output = 'New Complaint:\n'
+
+    questions_array = ['Site', 'Onset', 'Character', 'Radiation', 'Associated', 'Timing', 'Exacerbating/Relieving', 'Severity', 'Flags', 'Medication', 'Family History']
+    for question in questions_array:
+        output += f'{question}: ' + input(f'{question}: ') + '\n'
+
+    pyperclip.copy('WNL')
+    exam_array = ['Upper & Lower Neuro', 'ROM', 'Ortho Tests']
+    for question in exam_array:
+        output += f'{question}: ' + input(f'{question}: ') + '\n'
+    
+    output += 'Negative for 5D\'s & 3N\'s\nVerbal informed consent given, written/digital consent taken\n\n'
+    output += 'Diagnos(es): ' + input('Diagnos(es): ')
+
+    return output
 
 def command_prompt(patient_name):
-    return f'#################################################################\n\nPATIENT: {patient_name} - {full_date}\nCOMMANDS:\n--std:\nim,c,t,ls,m,lm,dn \n--history: \nim/nim/e \n--std treatments: \nc/t/ls/(m)an/(l)ow \n--muscles: \nbm/lm/um/sh/kn \n--misc: \ndn/a/e/sup):\n'
+    return f'#################################################################\n\nPATIENT: {patient_name} - {full_date}\nCOMMANDS:\n--std--\nim,f,m,lm,dn \n--history-- \nim/n/e/init \n--std regions & technique-- \n[b/l/r]f/c/t/ls/(m)an/lo/lc/ \n--muscles-- \nbm/lm/um/sh/kn \n--misc-- \ndn/a/sup/cup\n'
 
-def parse_commands(commands, prev_notes):
-    full_notes = ''
+def standard_commands():
+    treatment_note = ''
+    for standard_command in command_dict['s']:
+        treatment_note = treatment_note + command_dict[standard_command] + '\n'        
+    return treatment_note
+
+def custom_commands(commands):
+    treatment_note = ''
+    for custom_command in commands:
+        treatment_note = treatment_note + command_dict[custom_command.strip()] + '\n'
+    return treatment_note
+
+def parse_commands(commands):
+    treatment_note = ''
     try:
         commands = re.search('\[(.+?)\]', str(commands)).group(1) if type(commands) is str else commands
     except AttributeError:
         print('no regex match')
         pass
     print(commands)
-    if 'e' in commands and 's' not in commands:
+    if 'e' in commands:
         history_input = input('General history/progress input: ') + '\n\n'
-        for command in noteTemplates['s']:
-            full_notes = full_notes + noteTemplates[command] + '\n'
-    elif 'e' in commands:
-        history_input = input('General history/progress input: ') + '\n\n'
+        commands.remove('e')
+    elif 'init' in commands:
+        history_input = init_consult()
     else:
         history_input = ''
-    # if 's' and 'e' in commands:
-    #     full_notes = f'{prev_notes}\n\n{input("Additional notes: ")}'
-    #     for command in noteTemplates['s']:
-    #         full_notes = full_notes + noteTemplates[command] + '\n'
-    if 's' in commands and len(commands) == 1:
-        for command in noteTemplates['s']:
-            full_notes = full_notes + noteTemplates[command] + '\n'
-    ####### TODO: add sup catch AND EXERCISES
-    elif 's' not in commands:
-        for command in commands:
-            command = command.strip()
-            print(command)
-            # command = re.sub("\'", '', command) if "\'" in command else command
-            full_notes = full_notes + noteTemplates[command.strip().replace('\'', '')] + '\n'
+    if 's' in commands:
+        treatment_note += standard_commands()
+        commands.remove('s')
+    else:
+        treatment_note += custom_commands(commands)
     print('#################################################################')
-    return f'<{today}>\n{history_input}{full_notes}\n{str(commands) if len(commands) != 1 else f"{str(commands)}"}'
+    return f'<{today}>\n{history_input}{treatment_note}\n{str(commands) if len(commands) != 1 else f"{str(commands)}"}'
 
 def main():
     """Shows basic usage of the Google Calendar API.
@@ -107,7 +100,9 @@ def main():
     service = build('calendar', 'v3', credentials=creds)
 
     # Call the Calendar API
-    now = datetime.datetime.utcnow().isoformat() + 'Z' # 'Z' indicates UTC time
+    # now = datetime.datetime.utcnow().isoformat() + 'Z' # 'Z' indicates UTC time
+    now = datetime.date.today().strftime("%Y-%m-%d") + 'T05:00:00Z'
+    print(now)
     print('Getting the upcoming 50 events')
     events_result = service.events().list(calendarId='primary', timeMin=now,
                                         maxResults=50, singleEvents=True,
@@ -129,36 +124,28 @@ def main():
                     if previous_date.group(1) == today:
                         continue
                 except AttributeError:
-                    print('attribute error. continuing...')
+                    print('attribute error. Possibly invalid notes? continuing...')
                 # final_note = ''
                 old_note = event['description']
+                print('OLD_NOTE: ', old_note)
                 try:
-                    found = re.search('\[(.+?)\]', old_note).group(1)
+                    found_commands = str(re.compile(r'\[(.+?)\]').findall(old_note)).replace('\'', '').replace('\"', '').replace(']', '').replace('[', '')
                 except AttributeError:
-                    found = '' 
-                pyperclip.copy(found)
-                # print(old_note)
-                # if 'e' in event['description']:
-                user_input = input(f'{old_note} -{event["summary"]}- (p to paste): ').split(',') if found else input(command_prompt(event['summary'])).split(',')
-                if user_input == 'p':
-                    #call function - parse_notes()
-                    final_note = pyperclip.paste()
-                else:
-                    event['description'] = parse_commands(user_input, '')
+                    found_commands = '' 
+                    print('attribute error')
+                pyperclip.copy(found_commands)
+                old_note = old_note.replace('<br>', '\n').replace('&lt;', '<').replace('&gt;', '>')
+                user_input = input(f'\n~~~PREVIOUS NOTE~~~\n{old_note}\n-{event["summary"]}- (⌘ + v to paste): ').split(',') if found_commands else input(command_prompt(event['summary'])).split(',')
+                event['description'] = parse_commands(user_input)
                 
                 # print(event, final_note)
                 service.events().update(calendarId='primary', eventId=event['id'], body=event).execute()
                 print('#################################################################')
             except KeyError:
                 user_input = input(command_prompt(event['summary'])).split(',')
-                #call parse notes and update event description
-                event['description'] = parse_commands(user_input, '')
-                # print(event, parse_commands(user_input, ''))
+                event['description'] = parse_commands(user_input)
                 service.events().update(calendarId='primary', eventId=event['id'], body=event).execute()
                 print('#################################################################')
-
-    
-
 
 
 if __name__ == '__main__':
