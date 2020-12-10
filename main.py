@@ -136,7 +136,11 @@ def main():
                 pyperclip.copy(found_commands)
                 old_note = old_note.replace('<br>', '\n').replace('&lt;', '<').replace('&gt;', '>')
                 user_input = input(f'\n~~~PREVIOUS NOTE~~~\n{old_note}\n-{event["summary"]}- (⌘ + v to paste): ').split(',') if found_commands else input(command_prompt(event['summary'])).split(',')
-                event['description'] = parse_commands(user_input)
+
+                if user_input:
+                    event['description'] = parse_commands(user_input)
+                else:
+                    print('No entry. Skipping...')
                 
                 # print(event, final_note)
                 service.events().update(calendarId='primary', eventId=event['id'], body=event).execute()
