@@ -37,7 +37,7 @@ def init_consult():
     return output
 
 def command_prompt(patient_name):
-    return f'#################################################################\n\nPATIENT: {patient_name} - {full_date}\nCOMMANDS:\n--std--\ns/sd/sdl/sdu/sl \n--history-- \nim/n/e/init \n--std regions & technique-- \n[b/l/r]f/c/t/ls/(m)an/lo/lc/ \n--muscles-- \nbm/lm/um/sh/kn \n--misc-- \ndn/a/sup/cup\n>>> '
+    return f'#################################################################\n\nPATIENT: {patient_name} - {full_date}\nCOMMANDS:\n--std--\ns/sd/sdl/sdu/sl \n--history-- \nim/n/e/init \n--std regions & technique-- \n[b/l/r]f/tmj/c/t/ls/(m)an/lo/lc/ \n--muscles-- \nbm/lm/um/sh/kn \n--misc-- \ndn/a/sup/cup\n>>> '
 
 def standard_commands(commands):
     treatment_note = ''
@@ -142,7 +142,12 @@ def main():
                 user_input = input(f'\n~~~PREVIOUS NOTE~~~\n{old_note}\n-{event["summary"]}- (⌘ + v to paste): ').split(',') if found_commands else input(command_prompt(event['summary'])).split(',')
 
                 if user_input != ['']:
-                    event['description'] = parse_commands(user_input)
+                    try:
+                        event['description'] = parse_commands(user_input)
+                    except KeyError:
+                        print('Key Error: add commands first')
+                        user_input = input(f'\n~~~PREVIOUS NOTE~~~\n{old_note}\n-{event["summary"]}- (⌘ + v to paste): ').split(',') if found_commands else input(command_prompt(event['summary'])).split(',')
+                        event['description'] = parse_commands(user_input)
                 else:
                     event['description'] = f'<{today}>'
                     print('No entry. Skipping...')
