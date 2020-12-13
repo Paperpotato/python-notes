@@ -140,11 +140,14 @@ def main():
                 pyperclip.copy(found_commands)
                 old_note = old_note.replace('<br>', '\n').replace('&lt;', '<').replace('&gt;', '>')
                 user_input = input(f'\n~~~PREVIOUS NOTE~~~\n{old_note}\n-{event["summary"]}- (⌘ + v to paste): ').split(',') if found_commands else input(command_prompt(event['summary'])).split(',')
+                pyperclip.copy(user_input)
 
                 if user_input != ['']:
                     try:
                         event['description'] = parse_commands(user_input)
                     except KeyError:
+                        # Add user_input into clipboard, parse that and execute parse_commands? 
+                        
                         print('Key Error: add commands first')
                         user_input = input(f'\n~~~PREVIOUS NOTE~~~\n{old_note}\n-{event["summary"]}- (⌘ + v to paste): ').split(',') if found_commands else input(command_prompt(event['summary'])).split(',')
                         event['description'] = parse_commands(user_input)
