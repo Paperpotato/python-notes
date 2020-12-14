@@ -102,7 +102,7 @@ def main():
 
     # Call the Calendar API
     # now = datetime.datetime.utcnow().isoformat() + 'Z' # 'Z' indicates UTC time
-    now = datetime.date.today().strftime("%Y-%m-%d") + 'T05:00:00+08:00'
+    now = datetime.date.today().strftime("%Y-%m-%d") + 'T00:00:00+08:00'
     print(now)
     print('Getting the upcoming 50 events')
     events_result = service.events().list(calendarId='primary', timeMin=now,
@@ -121,26 +121,26 @@ def main():
             print(f'Skipping event: {event["summary"]}')
         else:
             try:
-                print('Note exists - skipping...')
-                # print(event['description'])
-                previous_date = re.search('<(.+?)>', event['description'])
+                previous_date = re.search('\d+-\d+-\d+', event['description'])
+                print(f'Found date: {previous_date.group(0)}')
                 try:
-                    if previous_date.group(1) == today:
+                    if previous_date.group(0) == today:
+                        print("today's note found, skipping...")
                         continue
                 except AttributeError:
                     print('attribute error. Possibly invalid notes? continuing...')
                 # final_note = ''
                 old_note = event['description']
-                print('OLD_NOTE: ', old_note)
+                # print('OLD_NOTE: ', old_note)
                 try:
                     found_commands = str(re.compile(r'\[(.+?)\]').findall(old_note)).replace('\'', '').replace('\"', '').replace(']', '').replace('[', '')
                 except AttributeError:
                     found_commands = '' 
                     print('attribute error')
-                pyperclip.copy(found_commands)
+                pyperclip.copy(str(found_commands))
                 old_note = old_note.replace('<br>', '\n').replace('&lt;', '<').replace('&gt;', '>')
                 user_input = input(f'\n~~~PREVIOUS NOTE~~~\n{old_note}\n-{event["summary"]}- (⌘ + v to paste): ').split(',') if found_commands else input(command_prompt(event['summary'])).split(',')
-                pyperclip.copy(user_input)
+                pyperclip.copy(str(user_input))
 
                 if user_input != ['']:
                     try:
