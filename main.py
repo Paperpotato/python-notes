@@ -1,5 +1,6 @@
 from __future__ import print_function
 import datetime
+from os import SCHED_IDLE
 import pickle
 import os.path
 from typing import final
@@ -37,7 +38,7 @@ def init_consult():
     return output
 
 def command_prompt(patient_name):
-    return f'#################################################################\n\nPATIENT: {patient_name} - {full_date}\nCOMMANDS:\n--std--\ns/sd/sdl/sdu/sl \n--history-- \nim/n/e/init \n--std regions & technique-- \n[b/l/r]f/tmj/c/t/ls/(m)an/lo/lc/ \n--muscles-- \nbm/lm/um/sh/kn \n--misc-- \ndn/a/sup/cup\n>>> '
+    return f'#################################################################\n\nPATIENT: {patient_name} - {full_date}\nCOMMANDS:\n--std--\ns/sd/sdl/sdu/sl \n--history-- \nim/n/e/init \n--std regions & technique-- \n[b/l/r]f/tmj/c/t/ls/(m)an/lo/lc/ \n--muscles-- \nbm/lm/um/sh/kn/wr \n--misc-- \ndn/a/sup/cup\n>>> '
 
 def standard_commands(commands):
     treatment_note = ''
@@ -51,7 +52,10 @@ def standard_commands(commands):
 def custom_commands(commands):
     treatment_note = ''
     for custom_command in commands:
-        treatment_note = treatment_note + command_dict[custom_command.strip()] + '\n'
+        if custom_command == 'init' or 's' == custom_command or 'sl' == custom_command or 'sd' == custom_command or 'sdl' == custom_command or 'sdu' == custom_command:
+            continue
+        else:
+            treatment_note = treatment_note + command_dict[custom_command.strip()] + '\n'
     return treatment_note
 
 def parse_commands(commands):
@@ -74,8 +78,7 @@ def parse_commands(commands):
         for command in commands:
             if 's' == command or 'sl' == command or 'sd' == command or 'sdl' == command or 'sdu' == command:
                 treatment_note += standard_commands(commands)
-            else:
-                treatment_note += custom_commands(commands)
+        treatment_note += custom_commands(commands)
         return f'<{today}>\n{history_input}{treatment_note}\n{str(commands) if len(commands) != 1 else f"{str(commands)}"}'
 
 def main():
@@ -102,10 +105,13 @@ def main():
 
     # Call the Calendar API
     # now = datetime.datetime.utcnow().isoformat() + 'Z' # 'Z' indicates UTC time
+    yesterday = datetime.date.today() - datetime.timedelta(1)
+    yesterday_formatted = yesterday.strftime("%Y-%m-%d") + 'T00:00:00+08:00'
+    yesterday_formatted_for_comparision = yesterday.strftime("%d-%m-%Y")
     now = datetime.date.today().strftime("%Y-%m-%d") + 'T00:00:00+08:00'
     print(now)
     print('Getting the upcoming 50 events')
-    events_result = service.events().list(calendarId='primary', timeMin=now,
+    events_result = service.events().list(calendarId='primary', timeMin=yesterday_formatted,
                                         maxResults=50, singleEvents=True,
                                         orderBy='startTime').execute()
 
@@ -124,7 +130,7 @@ def main():
                 previous_date = re.search('\d+-\d+-\d+', event['description'])
                 print(f'Found date: {previous_date.group(0)}')
                 try:
-                    if previous_date.group(0) == today:
+                    if previous_date.group(0) == today or previous_date.group(0) == yesterday_formatted_for_comparision:
                         print("today's note found, skipping...")
                         continue
                 except AttributeError:

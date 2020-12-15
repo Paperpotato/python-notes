@@ -27,6 +27,7 @@ command_dict = {
     'sh': 'bilateral shoulders',
     'kn': 'pes anserine. manual traction of bilateral knees',
     'pf': 'low-dye taping of plantar fascia',
+    'wr': 'low-dye taping of wrists for stability',
     #modalities
     'dn': 'Dry needling of above muscles',
     'cup': 'Myofascial cupping',
