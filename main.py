@@ -106,9 +106,9 @@ def main():
     yesterday_formatted_for_comparision = yesterday.strftime("%d-%m-%Y")
     now = datetime.date.today().strftime("%Y-%m-%d") + 'T00:00:00+08:00'
     print(now)
-    print('Getting the upcoming 50 events')
+    print('Getting the upcoming 70 events')
     events_result = service.events().list(calendarId='primary', timeMin=yesterday_formatted,
-                                        maxResults=50, singleEvents=True,
+                                        maxResults=70, singleEvents=True,
                                         orderBy='startTime').execute()
 
     events = events_result.get('items', [])
