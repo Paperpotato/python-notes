@@ -1,5 +1,5 @@
 import datetime
-import pyperclip
+import pandas as pd
 
 
 today = datetime.date.today().strftime("%d-%m-%Y")
@@ -28,12 +28,12 @@ command_dict = {
     'kn': 'pes anserine. manual traction of bilateral knees',
     'pf': 'low-dye taping of plantar fascia',
     'wr': 'low-dye taping of wrists for stability',
+    'el': 'wrist extensors',
+    'calf': 'peroneals, gastrocnemius and soleus',
     #modalities
     'dn': 'Dry needling of above muscles',
     'cup': 'Myofascial cupping',
     'a': 'ART of above muscles',
-    'ex': 'New exercises:',
-    'sup': 'Supplements recommended:',
     'sd': ['e', 'im', 'c', 't', 'ls', 'm', 'lm', 'dn', 'a'],
     'sdl': ['e', 'im', 'ls', 'dn', 'c', 't', 'm', 'lm', 'a'],
     'sdu': ['e', 'im', 'c', 'dn', 't', 'ls', 'm', 'lm', 'a'],
@@ -45,3 +45,23 @@ initial_dict = {
     #'Negative for 5D\'s & 3N\'s'
     # ['Site', 'Onset', 'Character', 'Radiation', 'Associated', 'Timing', 'Exacerbating/Relieving', 'Severity']
 }
+command_df_raw = {
+    'Std Tx': ['s', 'sd', 'sdu', 'sdl'],
+    '  History': ['e', 'im', 'n', 'init'],
+    '  Joints': ['f', 'c', 't', 'ls', 'tmj'],
+    '  Muscles': ['bm', 'lm', 'um', 'sh', 'kn', 'pf', 'wr', 'el', 'calf'],
+    '  Techniques': ['m', 'l', 'lc', 'dn', 'cup', 'a']
+    }
+max_length = 0
+for key in command_df_raw:
+    max_length = len(command_df_raw[key]) if len(command_df_raw[key]) >= max_length else max_length
+
+for key in command_df_raw:
+    delta = max_length - len(command_df_raw[key])
+    for x in range(delta):
+        command_df_raw[key].append('')
+
+df = pd.DataFrame(data=command_df_raw)
+df.to_string(index=False)
+
+# print(df)

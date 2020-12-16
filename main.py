@@ -1,6 +1,6 @@
 from __future__ import print_function
 import datetime
-from os import SCHED_IDLE
+# from os import SCHED_IDLE
 import pickle
 import os.path
 from typing import final
@@ -19,6 +19,7 @@ full_date = datetime.date.today().strftime('%d %b %y')
 print('Writing notes for:', today)
 
 command_dict = cd.command_dict
+command_df = cd.df
 
 def init_consult():
     output = 'New Complaint:\n'
@@ -38,24 +39,15 @@ def init_consult():
     return output
 
 def command_prompt(patient_name):
-    return f'#################################################################\n\nPATIENT: {patient_name} - {full_date}\nCOMMANDS:\n--std--\ns/sd/sdl/sdu/sl \n--history-- \nim/n/e/init \n--std regions & technique-- \n[b/l/r]f/tmj/c/t/ls/(m)an/lo/lc/ \n--muscles-- \nbm/lm/um/sh/kn/wr \n--misc-- \ndn/a/sup/cup\n>>> '
+    return f'#################################################################\n\nPATIENT: {patient_name} - {full_date}\n\n{command_df}\n>>> '
 
-def standard_commands(commands):
+def standard_commands(command):
     treatment_note = ''
-    for standard_command in command_dict[commands[0]]:
+    for standard_command in command_dict[command]:
         if standard_command == 'e':
             treatment_note += command_dict[standard_command] + '\n' + input('General history/progress input: ') + '\n\n'
         else:
             treatment_note += command_dict[standard_command] + '\n'        
-    return treatment_note
-
-def custom_commands(commands):
-    treatment_note = ''
-    for custom_command in commands:
-        if custom_command == 'init' or 's' == custom_command or 'sl' == custom_command or 'sd' == custom_command or 'sdl' == custom_command or 'sdu' == custom_command:
-            continue
-        else:
-            treatment_note = treatment_note + command_dict[custom_command.strip()] + '\n'
     return treatment_note
 
 def parse_commands(commands):
@@ -76,9 +68,13 @@ def parse_commands(commands):
         else:
             history_input = ''
         for command in commands:
+            command = command.strip()
+            if command == 'e':
+                continue
             if 's' == command or 'sl' == command or 'sd' == command or 'sdl' == command or 'sdu' == command:
-                treatment_note += standard_commands(commands)
-        treatment_note += custom_commands(commands)
+                treatment_note += standard_commands(command)
+            else:
+                treatment_note += command_dict[command]
         return f'<{today}>\n{history_input}{treatment_note}\n{str(commands) if len(commands) != 1 else f"{str(commands)}"}'
 
 def main():
@@ -128,10 +124,10 @@ def main():
         else:
             try:
                 previous_date = re.search('\d+-\d+-\d+', event['description'])
-                print(f'Found date: {previous_date.group(0)}')
+                # print(f'Found date: {previous_date.group(0)}')
                 try:
                     if previous_date.group(0) == today or previous_date.group(0) == yesterday_formatted_for_comparision:
-                        print("today's note found, skipping...")
+                        # print("today's note found, skipping...")
                         continue
                 except AttributeError:
                     print('attribute error. Possibly invalid notes? continuing...')
@@ -158,7 +154,8 @@ def main():
                         user_input = input(f'\n~~~PREVIOUS NOTE~~~\n{old_note}\n-{event["summary"]}- (⌘ + v to paste): ').split(',') if found_commands else input(command_prompt(event['summary'])).split(',')
                         event['description'] = parse_commands(user_input)
                 else:
-                    event['description'] = f'<{today}>'
+                    print(event['description'])
+                    event['description'] = f'<{today}>' if event['description'] == None else f'<{today}>\n' + event['description']
                     print('No entry. Skipping...')
                 
                 # print(event, final_note)
