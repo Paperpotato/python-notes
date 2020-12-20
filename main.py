@@ -24,7 +24,7 @@ command_df = cd.df
 def init_consult():
     output = 'New Complaint:\n'
 
-    questions_array = ['Site', 'Onset', 'Character', 'Radiation', 'Associated', 'Timing', 'Exacerbating/Relieving', 'Severity', 'Flags', 'Medication', 'Family History']
+    questions_array = ['Site', 'Onset', 'Character', 'Radiation', 'Associated', 'Timing', 'Exacerbating', 'Relieving', 'Severity', 'Flags', 'Medication', 'Family History']
     for question in questions_array:
         output += f'{question}: ' + input(f'{question}: ') + '\n'
 
