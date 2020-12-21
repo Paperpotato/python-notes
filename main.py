@@ -100,7 +100,6 @@ def main():
     service = build('calendar', 'v3', credentials=creds)
 
     # Call the Calendar API
-    # now = datetime.datetime.utcnow().isoformat() + 'Z' # 'Z' indicates UTC time
     yesterday = datetime.date.today() - datetime.timedelta(1)
     yesterday_formatted = yesterday.strftime("%Y-%m-%d") + 'T00:00:00+08:00'
     yesterday_formatted_for_comparision = yesterday.strftime("%d-%m-%Y")
@@ -124,16 +123,12 @@ def main():
         else:
             try:
                 previous_date = re.search('\d+-\d+-\d+', event['description'])
-                # print(f'Found date: {previous_date.group(0)}')
                 try:
                     if previous_date.group(0) == today or previous_date.group(0) == yesterday_formatted_for_comparision:
-                        # print("today's note found, skipping...")
                         continue
                 except AttributeError:
                     print('attribute error. Possibly invalid notes? continuing...')
-                # final_note = ''
                 old_note = event['description']
-                # print('OLD_NOTE: ', old_note)
                 try:
                     found_commands = str(re.compile(r'\[(.+?)\]').findall(old_note)).replace('\'', '').replace('\"', '').replace(']', '').replace('[', '')
                 except AttributeError:
