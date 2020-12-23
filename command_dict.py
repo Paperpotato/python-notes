@@ -30,6 +30,7 @@ command_dict = {
     'wr': 'low-dye taping of wrists for stability',
     'el': 'wrist extensors',
     'calf': 'peroneals, gastrocnemius and soleus',
+    'ankle': 'grade 4 bilateral ankle mobs',
     #modalities
     'dn': 'Dry needling of above muscles',
     'cup': 'Myofascial cupping',
