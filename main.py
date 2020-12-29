@@ -41,16 +41,17 @@ def init_consult():
 def command_prompt(patient_name):
     return f'#################################################################\n\nPATIENT: {patient_name} - {full_date}\n\n{command_df}\n>>> '
 
-def standard_commands(command):
+def standard_commands(command, history=None):
     treatment_note = ''
     for standard_command in command_dict[command]:
         if standard_command == 'e':
-            treatment_note += command_dict[standard_command] + '\n' + input('General history/progress input: ') + '\n\n'
+            treatment_note += command_dict[standard_command] + '\n' + input('General history/progress input: ') + '\n\n' if not history else history
         else:
-            treatment_note += command_dict[standard_command] + '\n'        
+            treatment_note += command_dict[standard_command] + '\n'    
+    print('returned treatment_note', treatment_note)    
     return treatment_note
 
-def parse_commands(commands):
+def parse_commands(commands, history=None):
     treatment_note = ''
     if commands == ['']:
         return f'<{today}>'
@@ -62,7 +63,7 @@ def parse_commands(commands):
             pass
         print(commands)
         if 'e' in commands:
-            history_input = input('General history/progress input: ') + '\n\n'
+            history_input = f"{input('General history/progress input: ')}\n\n" if not history else f'{history}\n\n'
         elif 'init' in commands:
             history_input = init_consult()
         else:
@@ -72,9 +73,13 @@ def parse_commands(commands):
             if command == 'e':
                 continue
             if 's' == command or 'sl' == command or 'sd' == command or 'sdl' == command or 'sdu' == command:
-                treatment_note += standard_commands(command)
+                treatment_note += standard_commands(command, history)
             else:
-                treatment_note += command_dict[command]
+                try:
+                    treatment_note += command_dict[command]
+                except KeyError:
+                    user_input = input('Tx commands: ').split(',')
+                    return parse_commands(user_input, commands[0])
         return f'<{today}>\n{history_input}{treatment_note}\n{str(commands) if len(commands) != 1 else f"{str(commands)}"}'
 
 def main():
@@ -140,14 +145,7 @@ def main():
                 pyperclip.copy(str(user_input))
 
                 if user_input != ['']:
-                    try:
-                        event['description'] = parse_commands(user_input)
-                    except KeyError:
-                        # Add user_input into clipboard, parse that and execute parse_commands? 
-                        
-                        print('Key Error: add commands first')
-                        user_input = input(f'\n~~~PREVIOUS NOTE~~~\n{old_note}\n-{event["summary"]}- (⌘ + v to paste): ').split(',') if found_commands else input(command_prompt(event['summary'])).split(',')
-                        event['description'] = parse_commands(user_input)
+                    event['description'] = parse_commands(user_input)
                 else:
                     print(event['description'])
                     event['description'] = f'<{today}>' if event['description'] == None else f'<{today}>\n' + event['description']
