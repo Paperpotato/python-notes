@@ -105,14 +105,14 @@ def main():
     service = build('calendar', 'v3', credentials=creds)
 
     # Call the Calendar API
-    yesterday = datetime.date.today() - datetime.timedelta(1)
+    yesterday = datetime.date.today() - datetime.timedelta(4)
     yesterday_formatted = yesterday.strftime("%Y-%m-%d") + 'T00:00:00+08:00'
     yesterday_formatted_for_comparision = yesterday.strftime("%d-%m-%Y")
     now = datetime.date.today().strftime("%Y-%m-%d") + 'T00:00:00+08:00'
     print(now)
     print('Getting the upcoming 70 events')
     events_result = service.events().list(calendarId='primary', timeMin=yesterday_formatted,
-                                        maxResults=70, singleEvents=True,
+                                        maxResults=100, singleEvents=True,
                                         orderBy='startTime').execute()
 
     events = events_result.get('items', [])
@@ -123,7 +123,7 @@ def main():
         start_date = event['start'].get('dateTime', event['start'].get('date'))
         start_time = event['start'].get('dateTime', event['start'].get('time'))
         print(f'entry for: {event["summary"]}')
-        if start_time == None or 'Mx' in event['summary']:
+        if start_time == None or 'Mx' in event['summary'] or 'Check' in event['summary'] or 'check' in event['summary']:
             print(f'Skipping event: {event["summary"]}')
         else:
             try:

@@ -11,7 +11,7 @@ command_dict = {
     'n': 'No improvement',
     'e': 'History:',
     'init': '',
-    'mx': 'Missed appointment'
+    'mx': 'Missed appointment',
     #spinal regions and method
     'f': 'C/Tx: C2/C5 supine manual, STT and ART to upper traps and levator scapularis, manual traction to cervical spine\nT/Tx: T7/T10\nLSI/Tx: L3/L4, L5/S1, RPI/LAS manual side posture, STT to bilateral multifidus and QLs, ART to piriformis and gluteals, PNF to hamstrings, myofascial release to low back fascia',
     'tmj': 'Temporalis, masseter, ptyergoids STT and ART.',
