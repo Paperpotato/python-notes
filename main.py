@@ -105,7 +105,7 @@ def main():
     service = build('calendar', 'v3', credentials=creds)
 
     # Call the Calendar API
-    yesterday = datetime.date.today() - datetime.timedelta(4)
+    yesterday = datetime.date.today() - datetime.timedelta(int(input('Please enter number of days before today: ')))
     yesterday_formatted = yesterday.strftime("%Y-%m-%d") + 'T00:00:00+08:00'
     yesterday_formatted_for_comparision = yesterday.strftime("%d-%m-%Y")
     now = datetime.date.today().strftime("%Y-%m-%d") + 'T00:00:00+08:00'
