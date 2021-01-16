@@ -21,6 +21,8 @@ print('Writing notes for:', today)
 command_dict = cd.command_dict
 command_df = cd.df
 
+pyperclip.copy('mild lbp and stiffness')
+
 def init_consult():
     output = 'New Complaint:\n'
 
@@ -35,6 +37,8 @@ def init_consult():
     
     output += 'Negative for 5D\'s & 3N\'s\nVerbal informed consent given, written/digital consent taken\n\n'
     output += 'Diagnos(es): ' + input('Diagnos(es): ')
+
+    pyperclip.copy('mild lbp and stiffness')
 
     return output
 
@@ -123,7 +127,8 @@ def main():
         start_date = event['start'].get('dateTime', event['start'].get('date'))
         start_time = event['start'].get('dateTime', event['start'].get('time'))
         print(f'entry for: {event["summary"]}')
-        if start_time == None or 'Mx' in event['summary'] or 'Check' in event['summary'] or 'check' in event['summary']:
+        event_title = event['summary'].lower()
+        if start_time == None or 'mx' in event_title or 'check' in event_title or 'cx' in event_title:
             print(f'Skipping event: {event["summary"]}')
         else:
             try:
